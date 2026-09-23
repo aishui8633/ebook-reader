@@ -4,16 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>郑在旅途的书库</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="stylesheet" href="/css/style.css">
-  <!-- JSZip (epub.js depends on it, must load first) -->
+  <link rel="icon" type="image/png" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#667eea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="/css/style.css?v=20260923">
+  <!-- JSZip -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <!-- epub.js -->
   <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
   <!-- PDF.js -->
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 </head>
-<body>
+<body style="background-image: url('http://zsl86.cn:5000/img/today.jpg') !important; background-size: cover !important; background-position: center !important; background-attachment: fixed !important; background-repeat: no-repeat !important;">
   <div id="app">
     <!-- 书架视图 -->
     <div id="library-view" class="view active">
@@ -31,12 +37,32 @@
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.35-4.35"></path>
             </svg>
-            <input type="text" id="search-input" placeholder="搜索书名...">
+            <input type="text" id="search-input" placeholder="搜索书名、文件名...">
           </div>
+          <button id="view-toggle-btn" class="btn btn-icon" title="切换视图">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+          <button id="batch-mode-btn" class="btn btn-icon" title="批量操作">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 11 12 14 22 4"></polyline>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+          </button>
           <button id="settings-btn" class="btn btn-icon" title="设置">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="3"></circle>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+          <button id="trash-btn" class="btn btn-icon" title="回收站" onclick="openTrash()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
             </svg>
           </button>
           <button id="upload-btn" class="btn btn-icon" title="上传书籍">
@@ -50,7 +76,7 @@
         </div>
       </header>
       
-      <!-- 分类筛选 -->
+      <!-- 分类筛选 + 排序 -->
       <div class="filter-bar">
         <div class="folder-nav">
           <button class="folder-btn active" data-folder="all" onclick="switchFolder('all')">
@@ -60,17 +86,62 @@
             <span>全部</span>
             <span class="count" id="count-all">0</span>
           </button>
-          <div class="folder-list" id="folder-list">
-            <!-- 动态生成 -->
+          <div class="folder-list" id="folder-list"></div>
+        </div>
+        <div class="filter-right">
+          <div class="format-filter">
+            <button class="filter-btn active" data-format="all">全部格式</button>
+            <button class="filter-btn" data-format="epub">EPUB</button>
+            <button class="filter-btn" data-format="pdf">PDF</button>
+            <button class="filter-btn" data-format="txt">TXT</button>
+            <button class="filter-btn" data-format="mobi">MOBI</button>
+            <button class="filter-btn" data-format="cbz">漫画</button>
+          </div>
+          <div class="sort-box">
+            <select id="sort-select" class="sort-select">
+              <option value="lastRead">最近阅读</option>
+              <option value="modified">修改日期</option>
+              <option value="title">书名</option>
+              <option value="size">大小</option>
+            </select>
           </div>
         </div>
-        <div class="format-filter">
-          <button class="filter-btn active" data-format="all">全部格式</button>
-          <button class="filter-btn" data-format="epub">EPUB</button>
-          <button class="filter-btn" data-format="pdf">PDF</button>
-          <button class="filter-btn" data-format="txt">TXT</button>
-          <button class="filter-btn" data-format="mobi">MOBI</button>
-          <button class="filter-btn" data-format="cbz">漫画</button>
+      </div>
+      
+      <!-- 标签筛选 -->
+      <div class="tags-bar" id="tags-bar" style="display:none">
+        <span class="tags-label">标签：</span>
+        <div class="tags-list" id="tags-filter-list"></div>
+      </div>
+      
+      <!-- 最近阅读 -->
+      <div class="recent-section" id="recent-section" style="display:none">
+        <div class="recent-header">
+          <span class="recent-title">📖 最近阅读</span>
+          <button class="recent-toggle" id="recent-toggle" onclick="toggleRecentSection()">收起</button>
+        </div>
+        <div class="recent-scroll" id="recent-scroll"></div>
+      </div>
+      
+      <!-- 批量操作栏 -->
+      <div class="batch-bar" id="batch-bar" style="display:none">
+        <span id="batch-count">已选 0 本</span>
+        <div class="batch-actions">
+          <button class="batch-btn" onclick="batchDelete()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            删除
+          </button>
+          <button class="batch-btn" onclick="batchTag()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            标签
+          </button>
+          <button class="batch-btn cancel" onclick="exitBatchMode()">取消</button>
         </div>
       </div>
       
@@ -93,14 +164,12 @@
         </button>
         <span id="book-title" class="book-title"></span>
         <div class="reader-controls">
-          <button id="font-decrease" class="btn-control" title="减小字体">
+          <button id="font-decrease" class="btn-control" title="减小字体">A-</button>
+          <button id="font-increase" class="btn-control" title="增大字体">A+</button>
+          <button id="reader-settings-btn" class="btn-control" title="阅读设置">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 7V4h16v3M9 20h6M12 4v16"></path>
-            </svg>
-          </button>
-          <button id="font-increase" class="btn-control" title="增大字体">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 7V4h16v3M9 20h6M12 4v16M20 12h-6"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
           </button>
           <button id="theme-toggle" class="btn-control" title="切换主题">
@@ -110,10 +179,91 @@
           </button>
         </div>
       </header>
+      
+      <!-- 阅读设置面板 -->
+      <div id="reader-settings-panel" class="reader-settings-panel" style="display:none">
+        <div class="settings-row">
+          <span>字体</span>
+          <div class="font-options">
+            <button class="font-opt active" data-font="system">系统</button>
+            <button class="font-opt" data-font="serif">宋体</button>
+            <button class="font-opt" data-font="sans">黑体</button>
+            <button class="font-opt" data-font="kai">楷体</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <span>字号</span>
+          <div class="font-size-options">
+            <button class="fs-opt" data-size="14">小</button>
+            <button class="fs-opt active" data-size="16">中</button>
+            <button class="fs-opt" data-size="18">大</button>
+            <button class="fs-opt" data-size="22">超大</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <span>行距</span>
+          <div class="line-height-options">
+            <button class="lh-opt" data-lh="1.5">紧凑</button>
+            <button class="lh-opt active" data-lh="1.8">适中</button>
+            <button class="lh-opt" data-lh="2.2">宽松</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <span>背景</span>
+          <div class="bg-options">
+            <button class="bg-opt active" data-bg="default" style="background:#1a1a1a" title="默认"></button>
+            <button class="bg-opt" data-bg="paper" style="background:#f5e6c8" title="羊皮纸"></button>
+            <button class="bg-opt" data-bg="eye" style="background:#c7edcc" title="护眼绿"></button>
+            <button class="bg-opt" data-bg="white" style="background:#ffffff" title="纯白"></button>
+            <button class="bg-opt" data-bg="dark" style="background:#0a0a0a" title="纯黑"></button>
+          </div>
+        </div>
+      </div>
+      
       <div id="reader-container" class="reader-container">
         <div id="epub-viewer" style="display:none;"></div>
       </div>
       <div id="epub-navbar" class="epub-navbar" style="display:none;"></div>
+      
+      <!-- 阅读进度条 -->
+      <div id="progress-bar" class="reading-progress-bar" style="display:none">
+        <div class="reading-progress-fill" id="reading-progress-fill"></div>
+        <span class="reading-progress-text" id="reading-progress-text">0%</span>
+      </div>
+    </div>
+    
+    <!-- 书籍详情弹窗 -->
+    <div id="book-detail-modal" class="modal">
+      <div class="modal-content detail-content">
+        <button class="detail-close" onclick="closeBookDetail()">×</button>
+        <div class="detail-body">
+          <div class="detail-cover">
+            <img id="detail-cover-img" src="" alt="">
+          </div>
+          <div class="detail-info">
+            <h2 id="detail-title"></h2>
+            <div class="detail-meta">
+              <span id="detail-format" class="detail-badge"></span>
+              <span id="detail-size"></span>
+              <span id="detail-date"></span>
+            </div>
+            <div class="detail-tags" id="detail-tags"></div>
+            <div class="detail-progress" id="detail-progress-row" style="display:none">
+              <span>阅读进度</span>
+              <div class="detail-progress-bar">
+                <div class="detail-progress-fill" id="detail-progress-fill"></div>
+              </div>
+              <span id="detail-progress-pct">0%</span>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-primary" onclick="detailOpenBook()">📖 开始阅读</button>
+              <button class="btn" onclick="detailEditTitle()">✏️ 改名</button>
+              <button class="btn" onclick="detailEditTags()">🏷️ 标签</button>
+              <button class="btn btn-danger" onclick="detailDeleteBook()">🗑️ 删除</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- 设置弹窗 -->
@@ -144,9 +294,41 @@
             <span id="opacity-value">100%</span>
           </div>
         </div>
+        <div class="settings-section">
+          <label>书库统计</label>
+          <div id="stats-info" class="stats-info">加载中...</div>
+        </div>
       </div>
     </div>
     
+    <!-- 书签弹窗 -->
+    <div id="bookmarks-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🔖 书签</h3>
+          <button class="btn-close" onclick="closeBookmarksModal()">×</button>
+        </div>
+        <div id="bookmarks-list" class="bookmarks-list"></div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" onclick="addBookmark()">+ 添加书签</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 回收站弹窗 -->
+    <div id="trash-modal" class="modal">
+      <div class="modal-content trash-content">
+        <div class="modal-header">
+          <h3>🗑️ 回收站 <span class="trash-hint">（保留 7 天）</span></h3>
+          <button class="btn-close" onclick="closeTrash()">×</button>
+        </div>
+        <div id="trash-list" class="trash-list"></div>
+        <div class="modal-footer">
+          <button class="btn btn-danger" onclick="emptyTrash()">清空回收站</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 上传进度 -->
     <div id="upload-modal" class="modal">
       <div class="modal-content">
@@ -158,9 +340,21 @@
         <p id="upload-status">准备上传...</p>
       </div>
     </div>
+    
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast"></div>
   </div>
   
-  <script src="/js/app.js"></script>
-  <script src="/js/reader.js"></script>
+  <script src="/js/app.js?v=20260923"></script>
+  <script src="/js/reader.js?v=20260923"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('✅ Service Worker 已注册'))
+          .catch(err => console.log('❌ Service Worker 注册失败:', err));
+      });
+    }
+  </script>
 </body>
 </html>

@@ -23,3 +23,20 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Trash & user data
+.trash/
+.tags.json
+.bookmarks.json
+.book-meta.json
+.reading-progress.json
+
+# Android build artifacts
+android-app/build/
+android-app/.gradle/
+android-app/app/build/
+*.apk
+*.aab
+
+# Icons and PWA (generated)
+# public/icons/ 保留

@@ -1,7 +1,7 @@
 {
   "name": "ebook-reader",
-  "version": "1.0.0",
-  "description": "全格式电子书阅读器",
+  "version": "2.0.0",
+  "description": "全格式电子书阅读器 v2.0.0 — 分页懒加载/标签/书签/回收站/阅读设置",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
