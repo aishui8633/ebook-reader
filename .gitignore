@@ -40,3 +40,6 @@ android-app/app/build/
 
 # Icons and PWA (generated)
 # public/icons/ 保留
+
+# Gradle distribution (should be downloaded, not committed)
+android-app/gradle-8.2/
